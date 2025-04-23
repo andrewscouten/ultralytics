@@ -99,7 +99,12 @@ def _resume_or_create_experiment(args: SimpleNamespace) -> None:
 
     try:
         _project_name = os.getenv("COMET_PROJECT_NAME", args.project)
-        experiment = comet_ml.start(project_name=_project_name)
+        experiment = comet_ml.start(
+            project_name=_project_name,
+            experiment_config=comet_ml.ExperimentConfig(
+                name=args.name
+            )
+        )
         experiment.log_parameters(vars(args))
         experiment.log_others(
             {
