@@ -35,22 +35,30 @@ RUN apt-get update && \
 RUN apt upgrade --no-install-recommends -y openssl tar
 
 # Create working directory
-WORKDIR /ultralytics
+WORKDIR /2025Elsevier
 
-# Copy contents and configure git
+# Copy yolo11n.pt for pretrained weights (if used)
 COPY . .
-RUN sed -i '/^\[http "https:\/\/github\.com\/"\]/,+1d' .git/config
 ADD https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n.pt .
 
+# Create anaconda environment
+RUN conda init bash && \
+    . ~/.bashrc 
+    # bash .environments/ultralytics.sh
+    # conda activate ultralytics
+    # pip install -e ultralytics[logging,extra,export] & \
+    # pip install uv && \
+    # uv pip install --system -e "ultralytics[export]" albumentations pycocotools "onnxruntime-gpu" tensorrt wandb
+
 # Install pip packages
-RUN pip install uv
-RUN uv pip install --system -e ".[export]" albumentations pycocotools "onnxruntime-gpu" tensorrt wandb
+# RUN pip install uv
+# RUN uv pip install --system -e ".[export]" albumentations pycocotools "onnxruntime-gpu" tensorrt wandb
 
 # Run exports to AutoInstall packages
 # Edge TPU export fails the first time so is run twice here
-RUN yolo export model=tmp/yolo11n.pt format=edgetpu imgsz=32 || yolo export model=tmp/yolo11n.pt format=edgetpu imgsz=32
-RUN yolo export model=tmp/yolo11n.pt format=ncnn imgsz=32
-RUN uv pip install --system paddlepaddle x2paddle
+# RUN yolo export model=tmp/yolo11n.pt format=edgetpu imgsz=32 || yolo export model=tmp/yolo11n.pt format=edgetpu imgsz=32
+# RUN yolo export model=tmp/yolo11n.pt format=ncnn imgsz=32
+# RUN uv pip install --system paddlepaddle x2paddle
 
 # Remove extra build files
 RUN rm -rf tmp /root/.config/Ultralytics/persistent_cache.json
